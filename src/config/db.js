@@ -1,16 +1,22 @@
-import express from "express";
-import dotenv from "dotenv";
+import mongoose from "mongoose";
 
-dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 3000;
+const connectDB = async () => {
+  const mongodbURl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@recipecluster.6dhwohq.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=RecipeCluster`;
 
-app.use(express.json());
+  await mongoose
+    .connect(mongodbURl)
+    .then(() => {
+      console.log("Connected successfully to MongoDB");
+    })
+    .catch((error) => {
+      console.error("Error connecting to MongoDB:", error);
+      process.exit(1);
+    });
 
-app.get("/", (req, res) => {
-  res.status(200).send("Application is working well");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is Running on ${PORT}`); 
-});
+  //   const db = mongoose.connect(mongodbURl);
+  //   db.on("error", console.error.bind(console, "connection error:"));
+  //   db.once("open", function () {
+  //     console.log("Connected successfully to MongoDB");
+  //   });
+};
+export default connectDB;
