@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../model/User.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 export const registerUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { email } = req.body;
+    let user = await User.findOne({ email });
 
     if (user) {
       console.log(user);
@@ -17,26 +19,64 @@ export const registerUser = async (req, res) => {
         },
       });
     }
-    const salt = await bcrypt.genSalt(Number(process.env.ENCRYPT_SALT_ROUNDS));
-    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = new User({
-      email,
-      password: hashedPassword,
+    if (!user) {
+      user = new User({ email });
+    }
+    // token generate
+    const token = crypto.randomBytes(6).toString("hex");
+    user.verifyToken = token;
+    user.verifyTokenExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    // send email
+
+    const transport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
     });
-    await newUser.save();
-    res.status(201).json({
-      status: "success",
-      message: "User registered successfully",
-      data: newUser,
+
+    await transport.sendMail({
+      to: email,
+      subject: "Your Verification Code",
+      html: `<p> Your code is: <b> ${token}</b></p>`,
     });
+    res.json({ message: "Verification code sent to email" });
   } catch (err) {
     console.log(err);
   }
 };
+
+export const verifyUser = async (req, res) => {
+  try {
+    const { email, token } = req.body;
+
+    const user = await User.findOne({
+      email,
+      verifyToken: token,
+      verifyTokenExpiry: { $gt: Date.now() },
+    });
+
+    if (!user)
+      return res.status(400).json({ message: "Invalid or expired token" });
+    const salt = await bcrypt.genSalt(Number(process.env.ENCRYPT_SALT_ROUNDS));
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.password = hashedPassword;
+    user.verifyToken = undefined;
+    user.verifyTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ message: "Password set successfully. You can now login." });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const loginUser = async (req, res) => {
-    console.log( req.body);
-    
   try {
     const { email, password } = req.body;
 
