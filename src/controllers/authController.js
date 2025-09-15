@@ -40,6 +40,7 @@ export const registerUser = async (req, res) => {
     });
 
     await transport.sendMail({
+      from: `Front Desk App <${process.env.EMAIL}>`,
       to: email,
       subject: "Your Verification Code",
       html: `<p> Your code is: <b> ${token}</b></p>`,
@@ -53,6 +54,7 @@ export const registerUser = async (req, res) => {
 export const verifyUser = async (req, res) => {
   try {
     const { email, token } = req.body;
+    console.log(req.body, "n");
 
     const user = await User.findOne({
       email,
@@ -62,6 +64,25 @@ export const verifyUser = async (req, res) => {
 
     if (!user)
       return res.status(400).json({ message: "Invalid or expired token" });
+
+    res.json({ message: "Token verified. You can now set your password." });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const setPassword = async (req, res) => {
+  try {
+    const { email, token, password } = req.body;
+    const user = await User.findOne({
+      email,
+      verifyToken: token,
+      verifyTokenExpiry: { $gt: Date.now() },
+    });
+    if (!user)
+      return res.status(400).json({ message: "Invalid or expired token" });
+
     const salt = await bcrypt.genSalt(Number(process.env.ENCRYPT_SALT_ROUNDS));
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -72,7 +93,7 @@ export const verifyUser = async (req, res) => {
 
     res.json({ message: "Password set successfully. You can now login." });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
