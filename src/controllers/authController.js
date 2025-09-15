@@ -3,6 +3,7 @@ import User from "../model/User.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import sendMailer from "../utils/sendMailer.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -30,21 +31,11 @@ export const registerUser = async (req, res) => {
     await user.save();
 
     // send email
-
-    const transport = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
-    });
-
-    await transport.sendMail({
-      from: `Front Desk App <${process.env.EMAIL}>`,
-      to: email,
-      subject: "Your Verification Code",
-      html: `<p> Your code is: <b> ${token}</b></p>`,
-    });
+    await sendMailer(
+      email,
+      "Your Verification Code",
+      `<p>Your code is: <b>${token}</b></p>`
+    );
     res.json({ message: "Verification code sent to email" });
   } catch (err) {
     console.log(err);

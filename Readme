@@ -1,0 +1,49 @@
+# 🔐 Password Reset Backend
+
+A backend API for **user authentication, email verification, and password reset functionality**.  
+Built with **Node.js, Express, MongoDB, JWT, Bcrypt, and Nodemailer**.
+
+---
+
+## 🚀 Live API
+
+🔗 [Password Reset Backend (Render Deployment)](https://password-rest-backend-q94i.onrender.com)
+
+---
+
+## 📂 Repository
+
+GitHub Repo: [Password-rest-backend](https://github.com/Sajitha94/Password-rest-backend)
+
+---
+
+## 📌 Features
+
+- ✅ Register user with email only
+- ✅ Send **verification code (OTP)** to email (expires in 10 minutes)
+- ✅ Verify OTP and allow password setup
+- ✅ Secure password storage with **bcrypt**
+- ✅ Login with email & password using **JWT authentication**
+- ✅ Resend verification token if expired
+- ✅ Organized code with `controllers`, `routes`, `utils` structure
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB + Mongoose
+- **Authentication**: JWT (JSON Web Token)
+- **Security**: Bcrypt for password hashing
+- **Email Service**: Nodemailer with Gmail
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Sajitha94/Password-rest-backend.git
+cd Password-rest-backend
+```
