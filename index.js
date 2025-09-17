@@ -4,7 +4,7 @@ import connectDB from "./src/config/db.js";
 import authRouter from "./src/routes/authRoutes.js";
 import errorHandler from "./src/middleware/errorHandler.js";
 import { protect } from "./src/middleware/authmiddleware.js";
-
+import cors from "cors";
 dotenv.config();
 connectDB();
 const app = express();
