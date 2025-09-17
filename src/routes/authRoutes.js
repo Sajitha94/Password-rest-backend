@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import {
+  forgotPassword,
   loginUser,
   registerUser,
   setPassword,
@@ -14,5 +15,6 @@ authRouter.post("/register", registerUser);
 authRouter.post("/login", loginUser);
 authRouter.post("/verify", verifyUser);
 authRouter.post("/setPassword", setPassword);
+authRouter.post("/forgotPassword", forgotPassword);
 
 export default authRouter;

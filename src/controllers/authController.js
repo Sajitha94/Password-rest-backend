@@ -42,6 +42,40 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      console.log(user);
+      return res.status(400).json({
+        status: "error",
+        message: "User does not exist with this email.Please Register!",
+        data: {
+          email: email,
+        },
+      });
+    }
+
+    // token generate
+    const token = crypto.randomBytes(6).toString("hex");
+    user.verifyToken = token;
+    user.verifyTokenExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    // send email
+    await sendMailer(
+      email,
+      "Your Verification Code",
+      `<p>Your code is: <b>${token}</b></p>`
+    );
+    res.json({ message: "Verification code sent to email" });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const verifyUser = async (req, res) => {
   try {
     const { email, token } = req.body;
