@@ -9,7 +9,7 @@ dotenv.config();
 connectDB();
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+app.use(cors());
 app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).send("Application is working well");
