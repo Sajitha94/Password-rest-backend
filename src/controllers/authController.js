@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
     const { email } = req.body;
     let user = await User.findOne({ email });
 
-    if (user) {
+    if (user && user?.password) {
       console.log(user);
       return res.status(400).json({
         status: "error",
@@ -93,13 +93,20 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({
         status: "error",
         message: "User does not exist with this email",
-        data: {
-          email,
-        },
+        data: { email },
+      });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        status: "error",
+        message: "User has not set a password yet. Please reset your password.",
+        data: { email },
       });
     }
 
@@ -107,21 +114,15 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({
         status: "error",
-        message: "Ivalid Password",
-        data: {
-          email,
-          password,
-        },
+        message: "Invalid password",
+        data: { email },
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-      },
-      process.env.JWT_AUTH_SECRET_KEY,
-      { expiresIn: "2d" }
-    );
+    const token = jwt.sign({ id: user.id }, process.env.JWT_AUTH_SECRET_KEY, {
+      expiresIn: "2d",
+    });
+
     res.status(200).json({
       status: "success",
       message: "User logged in successfully",
@@ -132,7 +133,8 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
 
